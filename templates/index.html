@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@visitsaudiar Content Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header .logo {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00a651, #ffffff, #006233);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: #888;
+      font-size: 14px;
+    }
+
+    .card {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 16px;
+      padding: 30px;
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      color: #f0f0f0;
+      font-size: 15px;
+      padding: 14px;
+      resize: vertical;
+      min-height: 120px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    textarea:focus { border-color: #00a651; }
+
+    .row {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .field { flex: 1; }
+
+    select, input[type="number"] {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      color: #f0f0f0;
+      font-size: 15px;
+      padding: 12px 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+      cursor: pointer;
+      appearance: none;
+    }
+
+    select:focus, input[type="number"]:focus { border-color: #00a651; }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.2s;
+      background: linear-gradient(135deg, #006233, #00a651);
+      color: white;
+      letter-spacing: 0.3px;
+    }
+
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .output-card {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 16px;
+      padding: 30px;
+      width: 100%;
+      max-width: 680px;
+      display: none;
+    }
+
+    .output-card.visible { display: block; }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .output-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .copy-all-btn {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #aaa;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-all-btn:hover { border-color: #00a651; color: #00a651; }
+
+    #output-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #e8e8e8;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .posts-container { margin-top: 16px; }
+
+    .post-item {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .post-text {
+      font-size: 15px;
+      line-height: 1.65;
+      color: #e8e8e8;
+      white-space: pre-wrap;
+      word-break: break-word;
+      padding-right: 36px;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: 1px solid #333;
+      color: #666;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover { border-color: #00a651; color: #00a651; }
+    .copy-btn.copied { border-color: #00a651; color: #00a651; }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .streaming-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #e8e8e8;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 16px;
+      background: #00a651;
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .char-count {
+      font-size: 12px;
+      color: #555;
+      margin-top: 8px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">🇸🇦</div>
+    <h1>@visitsaudiar Content Generator</h1>
+    <p>Generate engaging X posts for Saudi Arabia tourism</p>
+  </div>
+
+  <div class="card">
+    <label>Content Brief</label>
+    <textarea id="brief" placeholder="Describe what you want to post about... e.g. 'Promote AlUla's ancient Nabataean ruins and the magical desert landscape at sunset'"></textarea>
+
+    <div class="row">
+      <div class="field">
+        <label>Post Type</label>
+        <select id="post-type">
+          <option value="single tweet">Single Tweet</option>
+          <option value="thread (3-5 tweets)">Thread (3–5 Tweets)</option>
+          <option value="promotional">Promotional</option>
+          <option value="storytelling">Storytelling</option>
+          <option value="question/engagement">Question / Engagement</option>
+          <option value="event announcement">Event Announcement</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Number of Posts</label>
+        <input type="number" id="num-posts" value="3" min="1" max="10" />
+      </div>
+    </div>
+
+    <button class="btn" id="generate-btn" onclick="generate()">Generate Content</button>
+  </div>
+
+  <div class="output-card" id="output-card">
+    <div class="output-header">
+      <h2>Generated Posts</h2>
+      <button class="copy-all-btn" onclick="copyAll()">Copy All</button>
+    </div>
+    <div id="output-area"></div>
+  </div>
+
+  <script>
+    let fullText = "";
+
+    async function generate() {
+      const brief = document.getElementById("brief").value.trim();
+      if (!brief) {
+        alert("Please enter a content brief.");
+        return;
+      }
+
+      const numPosts = parseInt(document.getElementById("num-posts").value) || 3;
+      const postType = document.getElementById("post-type").value;
+
+      const btn = document.getElementById("generate-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Generating...';
+
+      const outputCard = document.getElementById("output-card");
+      const outputArea = document.getElementById("output-area");
+      outputCard.classList.add("visible");
+      outputArea.innerHTML = '<div class="streaming-text" id="stream-div"></div><span class="cursor"></span>';
+      fullText = "";
+
+      const streamDiv = document.getElementById("stream-div");
+
+      try {
+        const response = await fetch("/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ brief, num_posts: numPosts, post_type: postType })
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = line.slice(6);
+              if (data === "[DONE]") {
+                renderPosts(fullText);
+                return;
+              }
+              try {
+                const parsed = JSON.parse(data);
+                fullText += parsed.text;
+                streamDiv.textContent = fullText;
+              } catch {}
+            }
+          }
+        }
+      } catch (err) {
+        outputArea.innerHTML = `<p style="color:#ff6b6b">Error: ${err.message}</p>`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = "Generate Content";
+      }
+    }
+
+    function renderPosts(text) {
+      const outputArea = document.getElementById("output-area");
+
+      // Try to split into numbered posts
+      const postRegex = /(\d+\.\s)/g;
+      const parts = text.split(postRegex).filter(Boolean);
+
+      if (parts.length > 2) {
+        let html = '<div class="posts-container">';
+        let i = 0;
+        while (i < parts.length) {
+          if (/^\d+\.\s$/.test(parts[i])) {
+            const label = parts[i];
+            const content = parts[i + 1] || "";
+            const postText = (label + content).trim();
+            html += `
+              <div class="post-item">
+                <div class="post-text">${escapeHtml(postText)}</div>
+                <button class="copy-btn" onclick="copyPost(this, ${JSON.stringify(postText)})" title="Copy">⎘</button>
+              </div>`;
+            i += 2;
+          } else {
+            i++;
+          }
+        }
+        html += '</div>';
+        outputArea.innerHTML = html;
+      } else {
+        outputArea.innerHTML = `
+          <div class="post-item">
+            <div class="post-text">${escapeHtml(text.trim())}</div>
+            <button class="copy-btn" onclick="copyPost(this, ${JSON.stringify(text.trim())})" title="Copy">⎘</button>
+          </div>`;
+      }
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function copyPost(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = "✓";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = "⎘";
+          btn.classList.remove("copied");
+        }, 2000);
+      });
+    }
+
+    function copyAll() {
+      if (!fullText) return;
+      navigator.clipboard.writeText(fullText).then(() => {
+        const btn = document.querySelector(".copy-all-btn");
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = "Copy All", 2000);
+      });
+    }
+
+    document.getElementById("brief").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && e.metaKey) generate();
+    });
+  </script>
+</body>
+</html>
