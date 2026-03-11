@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, Response, stream_with_context
-import anthropic
+from openai import OpenAI
 import json
 
 app = Flask(__name__)
-client = anthropic.Anthropic()
+client = OpenAI()
 
 SYSTEM_PROMPT = """You are a professional social media content writer for @visitsaudiar,
 the official tourism account of Saudi Arabia on X (Twitter).
@@ -45,17 +45,24 @@ Post type: {post_type}
 Please generate {num_posts} {post_type} post(s) based on this brief for the @visitsaudiar X account."""
 
     def stream():
-        with client.messages.stream(
-            model="claude-opus-4-6",
+        response = client.chat.completions.create(
+            model="gpt-4o",
             max_tokens=2048,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_message}]
-        ) as stream:
-            for text in stream.text_stream:
+            stream=True,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_message}
+            ]
+        )
+        for chunk in response:
+            text = chunk.choices[0].delta.content
+            if text:
                 yield f"data: {json.dumps({'text': text})}\n\n"
         yield "data: [DONE]\n\n"
 
     return Response(stream_with_context(stream()), mimetype="text/event-stream")
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    import os
+    port = int(os.environ.get("PORT", 5001))
+    app.run(debug=True, port=port)
